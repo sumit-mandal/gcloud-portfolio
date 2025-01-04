@@ -1,0 +1,334 @@
+/* General Reset */  
+body {  
+    margin: 0;  
+    font-family: 'Arial', sans-serif;  
+    background-color: #f9f9f9;  
+    color: #333;  
+}  
+  
+/* Header Styling */  
+.header {  
+    background: linear-gradient(135deg, #ff7f50, #ff6347);  
+    color: white;  
+    text-align: center;  
+    padding: 20px 10px;  
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);  
+    position: relative;  
+    animation: slideDown 1s ease-out;  
+}  
+  
+.header h1 {  
+    font-size: 2rem;  
+    margin: 0;  
+}  
+  
+.header p {  
+    font-size: 1rem;  
+    margin: 5px 0 0;  
+}  
+  
+/* Dropdown Styling */  
+.dropdown {  
+    position: absolute;  
+    top: 50%;  
+    right: 10px;  
+    transform: translateY(-50%);  
+    display: flex;  
+    align-items: center;  
+}  
+  
+.dropdown select {  
+    padding: 10px 15px;  
+    font-size: 1rem;  
+    border: none;  
+    border-radius: 5px;  
+    background-color: #fff;  
+    color: #333;  
+    cursor: pointer;  
+    background-image: linear-gradient(45deg, #ff7f50 50%, transparent 50%), linear-gradient(135deg, transparent 50%, #ff7f50 50%);  
+    background-position: calc(100% - 15px) calc(1em + 1px), calc(100% - 10px) calc(1em + 1px);  
+    background-size: 5px 5px, 5px 5px;  
+    background-repeat: no-repeat;  
+    appearance: none;  
+    transition: background-color 0.3s ease, color 0.3s ease;  
+}  
+  
+.dropdown select:hover {  
+    background-color: #ff6347;  
+    color: #fff;  
+}  
+  
+.dropdown select:focus {  
+    outline: none;  
+    box-shadow: 0 0 10px rgba(255, 99, 71, 0.5);  
+}  
+  
+.dropdown select option {  
+    padding: 10px;  
+    background-color: #fff;  
+    color: #333;  
+    transition: background-color 0.3s ease, color 0.3s ease;  
+}  
+  
+.dropdown select option:hover {  
+    background-color: #ff6347;  
+    color: #fff;  
+}  
+  
+/* Main Content Styling */  
+.content {  
+    max-width: 95%;  
+    margin: 30px auto;  
+    padding: 10px;  
+}  
+  
+.journey {  
+    position: relative;  
+    overflow: hidden;  
+}  
+  
+.carousel {  
+    display: flex;  
+    transition: transform 0.5s ease-in-out;  
+}  
+  
+.carousel-item {  
+    min-width: 100%;  
+    box-sizing: border-box;  
+    padding: 20px;  
+    border-radius: 10px;  
+    box-shadow: 0 4px 6px rgba(226, 10, 10, 0.1);  
+    display: flex;  
+    flex-direction: column;  
+    align-items: center;  
+    position: relative;  
+    opacity: 0;  
+    transform: scale(0.95);  
+    animation: fadeInUp 0.5s forwards;  
+}  
+  
+.carousel-item img {  
+    width: 90%;  
+    max-width: 300px;  
+    height: auto;  
+    margin-bottom: 20px;  
+    border-radius: 10px;  
+    border: 4px solid rgb(237, 183, 7);  
+    transition: transform 0.3s ease;  
+}  
+  
+.carousel-item img:hover {  
+    transform: scale(1.05);  
+}  
+  
+.description {  
+    text-align: center;  
+    padding: 0 10px;  
+}  
+  
+.description h2 {  
+    font-size: 1.3rem;  
+    margin-bottom: 10px;  
+    color: #ff7f50;  
+}  
+  
+.description p {  
+    font-size: 1rem;  
+    line-height: 1.6;  
+    animation: fadeIn 1.5s ease-in;  
+}  
+  
+.description.p-0 p { color: #ff7f50; }  
+.description.p-1 p { color: #84fab0; }  
+.description.p-2 p { color: #ff6347; }  
+.description.p-3 p { color: #8fd3f4; }  
+.description.p-4 p { color: #333; }  
+.description.p-5 p { color: #087be0; }  
+.description.p-6 p { color: #05ffea; }  
+.description.p-7 p { color: #84fab0; }  
+  
+/* Navigation Buttons */  
+.prev, .next {  
+    position: absolute;  
+    top: 50%;  
+    transform: translateY(-50%);  
+    background-color: rgba(0, 0, 0, 0.5);  
+    color: white;  
+    border: none;  
+    font-size: 1.5rem;  
+    padding: 10px;  
+    cursor: pointer;  
+    border-radius: 50%;  
+    z-index: 10;  
+    transition: background-color 0.3s ease;  
+}  
+  
+.prev:hover, .next:hover {  
+    background-color: rgba(0, 0, 0, 0.8);  
+}  
+  
+.prev {  
+    left: 10px;  
+}  
+  
+.next {  
+    right: 10px;  
+}  
+  
+/* Footer Styling */  
+.footer {  
+    background-color: #333;  
+    color: white;  
+    text-align: center;  
+    padding: 15px 10px;  
+    position: relative;  
+    bottom: 0;  
+    width: 100%;  
+    animation: fadeIn 1.5s ease-in-out;  
+}  
+  
+.footer p {  
+    margin: 0;  
+    font-size: 0.9rem;  
+}  
+  
+/* Recruiter Section Styling */  
+.recruiter-redirect {  
+    background: linear-gradient(135deg, #84fab0, #8fd3f4);  
+    color: #fff;  
+    padding: 20px;  
+    text-align: center;  
+    margin: 10px auto;  
+    border-radius: 10px;  
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);  
+    animation: fadeIn 1.5s ease-in-out;  
+}  
+  
+.recruiter-container {  
+    max-width: 90%;  
+    margin: 0 auto;  
+}  
+  
+.recruiter-redirect h2 {  
+    font-size: 2rem;  
+    margin-bottom: 10px;  
+}  
+  
+.recruiter-redirect p {  
+    font-size: 1rem;  
+    margin-bottom: 20px;  
+}  
+  
+.cta-button {  
+    display: inline-block;  
+    padding: 10px 15px;  
+    background-color: #fff;  
+    color: #333;  
+    font-size: 0.9rem;  
+    font-weight: bold;  
+    text-decoration: none;  
+    border-radius: 5px;  
+    transition: all 0.3s ease;  
+}  
+  
+.cta-button:hover {  
+    background-color: #333;  
+    color: #fff;  
+    transform: scale(1.1);  
+}  
+  
+/* Bounce Animation */  
+.bounce {  
+    animation: bounce 0.5s;  
+}  
+  
+@keyframes bounce {  
+    0%, 100% {  
+        transform: translateY(0);  
+    }  
+    50% {  
+        transform: translateY(-10px);  
+    }  
+}  
+  
+/* Fade In Animation */  
+@keyframes fadeIn {  
+    from {  
+        opacity: 0;  
+    }  
+    to {  
+        opacity: 1;  
+    }  
+}  
+  
+/* Slide Down Animation */  
+@keyframes slideDown {  
+    from {  
+        transform: translateY(-100%);  
+    }  
+    to {  
+        transform: translateY(0);  
+    }  
+}  
+  
+/* Fade In Up Animation */  
+@keyframes fadeInUp {  
+    from {  
+        opacity: 0;  
+        transform: translateY(20px);  
+    }  
+    to {  
+        opacity: 1;  
+        transform: translateY(0);  
+    }  
+}  
+  
+/* Select Animation */  
+@keyframes selectAnimation {  
+    0% { transform: scale(1); }  
+    50% { transform: scale(1.1); }  
+    100% { transform: scale(1); }  
+}  
+  
+/* Responsive Design */  
+@media screen and (max-width: 768px) {  
+    .header h1 {  
+        font-size: 1.8rem;  
+    }  
+    .header p {  
+        font-size: 0.9rem;  
+    }  
+    .dropdown {  
+        position: static;  
+        transform: none;  
+        margin-top: 10px;  
+    }  
+    .dropdown select {  
+        font-size: 0.8rem;  
+    }  
+    .recruiter-redirect h2 {  
+        font-size: 1.8rem;  
+    }  
+    .recruiter-redirect p {  
+        font-size: 0.9rem;  
+    }  
+    .carousel-item img {  
+        width: 100%;  
+        max-width: 250px;  
+    }  
+    .description h2 {  
+        font-size: 1.2rem;  
+    }  
+    .description p {  
+        font-size: 0.9rem;  
+    }  
+    .prev, .next {  
+        font-size: 1.2rem;  
+    }  
+    .prev {  
+        left: 5px;  
+    }  
+    .next {  
+        right: 5px;  
+    }  
+}  
