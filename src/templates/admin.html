@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../static/css/admin.css">
+</head>
+<body>
+
+    <header class="admin-header">
+        <div class="admin-header-left">
+            <h1>Admin Panel</h1>
+            <span class="badge">{{ sections | length }} entries</span>
+        </div>
+        <div class="admin-header-right">
+            <a href="/" class="btn btn-ghost" target="_blank">View Site</a>
+            <a href="/admin/logout" class="btn btn-ghost btn-danger-ghost">Logout</a>
+        </div>
+    </header>
+
+    <main class="admin-main">
+        <!-- Create / Edit Form -->
+        <section class="admin-form-section" id="form-section">
+            <h2 id="form-heading">Create New Entry</h2>
+            <form id="section-form" onsubmit="handleSubmit(event)">
+                <input type="hidden" id="section-id" value="">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="title">Title</label>
+                        <input type="text" id="title" name="title" placeholder="e.g. Kashmir, Goa..." required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="description">Description</label>
+                    <textarea id="description" name="description" rows="4" placeholder="Share your experience..." required></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Upload Images</label>
+                    <div class="file-upload">
+                        <input type="file" id="images" name="images" multiple accept="image/*" onchange="previewFiles(this)">
+                        <div class="file-upload-inner">
+                            <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                            <p>Drop files here or click to browse</p>
+                            <span>JPG, PNG, GIF, WebP &bull; Max 16MB</span>
+                        </div>
+                    </div>
+                    <div class="preview-row" id="image-preview"></div>
+                </div>
+
+                <div class="form-group" id="existing-images-group" style="display:none;">
+                    <label>Current Images <small>(click X to remove)</small></label>
+                    <div class="preview-row" id="existing-images"></div>
+                </div>
+
+                <div class="form-actions">
+                    <button type="button" class="btn btn-ghost" id="cancel-btn" onclick="resetForm()" style="display:none;">Cancel Edit</button>
+                    <button type="submit" class="btn btn-primary" id="submit-btn">Create Entry</button>
+                </div>
+            </form>
+        </section>
+
+        <!-- Entries List -->
+        <section class="admin-list">
+            <h2>All Entries</h2>
+            {% if not sections %}
+            <p class="empty-msg">No entries yet. Create one above.</p>
+            {% endif %}
+            <div class="entry-list" id="entry-list">
+                {% for section in sections %}
+                <div class="entry-row" data-id="{{ section.id }}">
+                    <div class="entry-thumb">
+                        {% if section.images %}
+                        <img src="{{ section.images[0].url }}" alt="">
+                        {% else %}
+                        <div class="thumb-empty">?</div>
+                        {% endif %}
+                    </div>
+                    <div class="entry-info">
+                        <h3>{{ section.title }}</h3>
+                        <p>{{ section.description[:120] }}{% if section.description|length > 120 %}...{% endif %}</p>
+                        <span class="entry-meta">{{ section.images | length }} image{{ 's' if section.images | length != 1 else '' }}</span>
+                    </div>
+                    <div class="entry-actions">
+                        <button class="btn btn-sm btn-ghost" onclick='startEdit({{ section | tojson }})'>Edit</button>
+                        <button class="btn btn-sm btn-ghost btn-danger-ghost" onclick="deleteSection({{ section.id }})">Delete</button>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </section>
+    </main>
+
+    <div class="toast" id="toast"></div>
+
+    <script src="../static/js/admin.js"></script>
+</body>
+</html>
