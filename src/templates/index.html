@@ -69,7 +69,12 @@
     <div class="lightbox" id="lightbox" onclick="closeLightbox(event)">
         <div class="lightbox-content" onclick="event.stopPropagation()">
             <button class="lightbox-close" onclick="closeLightbox()">&times;</button>
-            <div class="lightbox-gallery" id="lightbox-gallery"></div>
+            <div class="lightbox-slider" id="lightbox-slider">
+                <div class="lightbox-track" id="lightbox-track"></div>
+                <button class="lb-arrow lb-prev" id="lb-prev" onclick="slideImage(-1)">&#8249;</button>
+                <button class="lb-arrow lb-next" id="lb-next" onclick="slideImage(1)">&#8250;</button>
+                <div class="lb-counter" id="lb-counter"></div>
+            </div>
             <div class="lightbox-info">
                 <h2 id="lightbox-title"></h2>
                 <p id="lightbox-desc"></p>
