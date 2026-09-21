@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin · Portfolio CMS</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Space+Mono:wght@400;700&family=Syne:wght@700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/css/style.css">
+    <link rel="stylesheet" href="/static/css/admin.css">
+</head>
+<body class="admin-body">
+    <div class="noise" aria-hidden="true"></div>
+
+    <header class="admin-top">
+        <div>
+            <span class="mono-label">CMS</span>
+            <h1>Portfolio Admin</h1>
+        </div>
+        <div class="admin-top-actions">
+            <a class="ghost-btn" href="/" target="_blank" rel="noopener">View site</a>
+            <form method="post" action="/admin/logout">
+                <button type="submit" class="ghost-btn danger">Logout</button>
+            </form>
+        </div>
+    </header>
+
+    {% if flash %}
+    <div class="flash flash-ok admin-flash">{{ flash }}</div>
+    {% endif %}
+
+    <div class="admin-layout">
+        <aside class="admin-side">
+            <a href="#home">Home & photo</a>
+            <a href="#sections">Sections</a>
+            {% for section in content.sections %}
+            <a href="#section-{{ section.id }}">{{ section.nav_label }}</a>
+            {% endfor %}
+            <a href="#create">+ New section</a>
+        </aside>
+
+        <main class="admin-main">
+            <!-- HOME -->
+            <section class="admin-panel" id="home">
+                <h2>Home</h2>
+                <form method="post" action="/admin/home" class="stack-form">
+                    <div class="grid-2">
+                        <label>Name line 1<input name="name_line_1" value="{{ content.home.name_line_1 }}" required></label>
+                        <label>Name line 2<input name="name_line_2" value="{{ content.home.name_line_2 }}" required></label>
+                    </div>
+                    <label>Role sticker<input name="role_sticker" value="{{ content.home.role_sticker }}"></label>
+                    <label>Tagline<input name="tagline" value="{{ content.home.tagline }}"></label>
+                    <div class="grid-2">
+                        <label>Email<input name="email" type="email" value="{{ content.home.email }}"></label>
+                        <label>CTA text<input name="cta_text" value="{{ content.home.cta_text }}"></label>
+                    </div>
+                    <div class="grid-2">
+                        <label>Badge 1<input name="badge_1" value="{{ content.home.badge_1 }}"></label>
+                        <label>Badge 2<input name="badge_2" value="{{ content.home.badge_2 }}"></label>
+                    </div>
+                    <label>Marquee text<input name="marquee" value="{{ content.home.marquee }}"></label>
+                    <div class="grid-2">
+                        <label>Page title<input name="site_title" value="{{ content.site.title }}"></label>
+                        <label>Footer<input name="footer" value="{{ content.site.footer }}"></label>
+                    </div>
+                    <button type="submit" class="contact-btn admin-btn">Save home</button>
+                </form>
+
+                <hr class="admin-hr">
+                <h3>Profile photo</h3>
+                <div class="photo-row">
+                    <img class="admin-photo" src="{{ content.home.profile_image }}" alt="Current profile">
+                    <form method="post" action="/admin/photo" enctype="multipart/form-data" class="stack-form">
+                        <label>Upload new photo
+                            <input type="file" name="photo" accept="image/jpeg,image/png,image/webp,image/gif" required>
+                        </label>
+                        <button type="submit" class="contact-btn admin-btn">Replace photo</button>
+                    </form>
+                </div>
+            </section>
+
+            <!-- SECTION ORDER -->
+            <section class="admin-panel" id="sections">
+                <h2>Section order</h2>
+                <p class="help">Drag order by editing the comma-separated IDs, or use the list below.</p>
+                <form method="post" action="/admin/sections/reorder" class="stack-form" id="reorder-form">
+                    <ol class="order-list" id="order-list">
+                        {% for section in content.sections %}
+                        <li data-id="{{ section.id }}">
+                            <span class="drag-handle">⠿</span>
+                            <strong>{{ section.title }}</strong>
+                            <code>{{ section.id }}</code>
+                            <em>{{ section.type }}</em>
+                            {% if not section.enabled %}<span class="pill off">hidden</span>{% endif %}
+                        </li>
+                        {% endfor %}
+                    </ol>
+                    <input type="hidden" name="order" id="order-input" value="{{ content.sections | map(attribute='id') | join(',') }}">
+                    <button type="submit" class="contact-btn admin-btn">Save order</button>
+                </form>
+            </section>
+
+            <!-- PER SECTION -->
+            {% for section in content.sections %}
+            <section class="admin-panel" id="section-{{ section.id }}">
+                <div class="panel-head">
+                    <h2>{{ section.title }} <code>{{ section.type }}</code></h2>
+                    <form method="post" action="/admin/sections/{{ section.id }}/delete" onsubmit="return confirm('Delete this entire section?');">
+                        <button type="submit" class="ghost-btn danger">Delete section</button>
+                    </form>
+                </div>
+
+                <form method="post" action="/admin/sections/{{ section.id }}/meta" class="stack-form">
+                    <div class="grid-2">
+                        <label>Title<input name="title" value="{{ section.title }}" required></label>
+                        <label>Nav label<input name="nav_label" value="{{ section.nav_label }}" required></label>
+                    </div>
+                    <div class="grid-2">
+                        <label>Mono label<input name="label" value="{{ section.label }}"></label>
+                        <label>Theme class<input name="theme" value="{{ section.theme }}"></label>
+                    </div>
+                    <label class="check">
+                        <input type="checkbox" name="enabled" {% if section.enabled %}checked{% endif %}>
+                        Visible on site
+                    </label>
+                    {% if section.type == "custom" %}
+                    <label>HTML body
+                        <textarea name="body" rows="8">{{ section.body or "" }}</textarea>
+                    </label>
+                    {% endif %}
+                    <button type="submit" class="contact-btn admin-btn">Save section settings</button>
+                </form>
+
+                {% if section.type == "skills" %}
+                <hr class="admin-hr">
+                <h3>Skills (one per line)</h3>
+                <form method="post" action="/admin/sections/{{ section.id }}/skills" class="stack-form">
+                    <textarea name="skills" rows="14">{% for skill in section.entries %}{{ skill }}
+{% endfor %}</textarea>
+                    <button type="submit" class="contact-btn admin-btn">Save skills</button>
+                </form>
+                {% endif %}
+
+                {% if section.type == "experience" %}
+                <hr class="admin-hr">
+                <h3>Add experience</h3>
+                <form method="post" action="/admin/sections/{{ section.id }}/experience/add" class="stack-form">
+                    <div class="grid-2">
+                        <label>Date<input name="date" placeholder="08/2025 – Current" required></label>
+                        <label>Tag<input name="tag" placeholder="Now"></label>
+                    </div>
+                    <label>Title<input name="title" required></label>
+                    <label>Bullets (one per line)<textarea name="bullets" rows="5"></textarea></label>
+                    <button type="submit" class="contact-btn admin-btn">Add entry</button>
+                </form>
+
+                {% for job in section.entries %}
+                <details class="entry-card">
+                    <summary>{{ job.title }}</summary>
+                    <form method="post" action="/admin/sections/{{ section.id }}/experience/{{ loop.index0 }}/update" class="stack-form">
+                        <div class="grid-2">
+                            <label>Date<input name="date" value="{{ job.date }}" required></label>
+                            <label>Tag<input name="tag" value="{{ job.tag or '' }}"></label>
+                        </div>
+                        <label>Title<input name="title" value="{{ job.title }}" required></label>
+                        <label>Bullets<textarea name="bullets" rows="8">{% for b in job.bullets %}{{ b }}
+{% endfor %}</textarea></label>
+                        <div class="row-actions">
+                            <button type="submit" class="contact-btn admin-btn">Update</button>
+                        </div>
+                    </form>
+                    <form method="post" action="/admin/sections/{{ section.id }}/experience/{{ loop.index0 }}/delete" onsubmit="return confirm('Delete this entry?');">
+                        <button type="submit" class="ghost-btn danger">Delete entry</button>
+                    </form>
+                </details>
+                {% endfor %}
+                {% endif %}
+
+                {% if section.type == "education" %}
+                <hr class="admin-hr">
+                <h3>Add education</h3>
+                <form method="post" action="/admin/sections/{{ section.id }}/education/add" class="stack-form">
+                    <div class="grid-2">
+                        <label>Year<input name="year" required></label>
+                        <label class="check"><input type="checkbox" name="alt"> Alt color</label>
+                    </div>
+                    <label>Title<input name="title" required></label>
+                    <label>Subtitle<input name="subtitle"></label>
+                    <button type="submit" class="contact-btn admin-btn">Add entry</button>
+                </form>
+
+                {% for edu in section.entries %}
+                <details class="entry-card">
+                    <summary>{{ edu.title }}</summary>
+                    <form method="post" action="/admin/sections/{{ section.id }}/education/{{ loop.index0 }}/update" class="stack-form">
+                        <div class="grid-2">
+                            <label>Year<input name="year" value="{{ edu.year }}" required></label>
+                            <label class="check"><input type="checkbox" name="alt" {% if edu.alt %}checked{% endif %}> Alt color</label>
+                        </div>
+                        <label>Title<input name="title" value="{{ edu.title }}" required></label>
+                        <label>Subtitle<input name="subtitle" value="{{ edu.subtitle }}"></label>
+                        <button type="submit" class="contact-btn admin-btn">Update</button>
+                    </form>
+                    <form method="post" action="/admin/sections/{{ section.id }}/education/{{ loop.index0 }}/delete" onsubmit="return confirm('Delete this entry?');">
+                        <button type="submit" class="ghost-btn danger">Delete entry</button>
+                    </form>
+                </details>
+                {% endfor %}
+                {% endif %}
+
+                {% if section.type == "achievements" %}
+                <hr class="admin-hr">
+                <h3>Add achievement</h3>
+                <form method="post" action="/admin/sections/{{ section.id }}/achievements/add" class="stack-form">
+                    <label>Badge<input name="badge" required></label>
+                    <label>Text<textarea name="text" rows="3" required></textarea></label>
+                    <button type="submit" class="contact-btn admin-btn">Add achievement</button>
+                </form>
+
+                {% for item in section.entries %}
+                <details class="entry-card">
+                    <summary>{{ item.badge }} — {{ item.text[:60] }}{% if item.text|length > 60 %}…{% endif %}</summary>
+                    <form method="post" action="/admin/sections/{{ section.id }}/achievements/{{ loop.index0 }}/update" class="stack-form">
+                        <label>Badge<input name="badge" value="{{ item.badge }}" required></label>
+                        <label>Text<textarea name="text" rows="3" required>{{ item.text }}</textarea></label>
+                        <button type="submit" class="contact-btn admin-btn">Update</button>
+                    </form>
+                    <form method="post" action="/admin/sections/{{ section.id }}/achievements/{{ loop.index0 }}/delete" onsubmit="return confirm('Delete this achievement?');">
+                        <button type="submit" class="ghost-btn danger">Delete entry</button>
+                    </form>
+                </details>
+                {% endfor %}
+                {% endif %}
+            </section>
+            {% endfor %}
+
+            <!-- CREATE -->
+            <section class="admin-panel" id="create">
+                <h2>Create section</h2>
+                <form method="post" action="/admin/sections/create" class="stack-form">
+                    <div class="grid-2">
+                        <label>Title<input name="title" required></label>
+                        <label>Nav label<input name="nav_label" required></label>
+                    </div>
+                    <div class="grid-2">
+                        <label>Mono label<input name="label" placeholder="05 // EXTRA"></label>
+                        <label>Type
+                            <select name="section_type">
+                                <option value="custom">Custom (HTML)</option>
+                                <option value="skills">Skills</option>
+                                <option value="experience">Experience</option>
+                                <option value="education">Education</option>
+                                <option value="achievements">Achievements</option>
+                            </select>
+                        </label>
+                    </div>
+                    <label>Theme class (optional)<input name="theme" placeholder="custom-section"></label>
+                    <label>Initial body / skills (optional)
+                        <textarea name="body" rows="5" placeholder="For custom: HTML. For skills: one skill per line."></textarea>
+                    </label>
+                    <button type="submit" class="contact-btn admin-btn">Create section</button>
+                </form>
+            </section>
+        </main>
+    </div>
+
+    <script src="/static/js/admin.js"></script>
+</body>
+</html>

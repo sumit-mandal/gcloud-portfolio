@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ content.site.title }}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Space+Mono:wght@400;700&family=Syne:wght@700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <div class="noise" aria-hidden="true"></div>
+
+    <nav class="site-nav" id="site-nav">
+        <a class="nav-brand" href="#home">SM</a>
+        <ul>
+            <li><a href="#home">Home</a></li>
+            {% for section in sections %}
+            <li><a href="#{{ section.id }}">{{ section.nav_label }}</a></li>
+            {% endfor %}
+        </ul>
+    </nav>
+
+    <section id="home" class="section hero">
+        <div class="hero-grid" aria-hidden="true"></div>
+        <div class="hero-blob blob-a" aria-hidden="true"></div>
+        <div class="hero-blob blob-b" aria-hidden="true"></div>
+        <div class="container hero-layout">
+            <div class="hero-copy">
+                {% if content.home.role_sticker %}
+                <span class="sticker sticker-lime rotate-left">{{ content.home.role_sticker }}</span>
+                {% endif %}
+                <h1>{{ content.home.name_line_1 }}<br>{{ content.home.name_line_2 }}</h1>
+                <p class="hero-tagline">{{ content.home.tagline }}</p>
+                <a href="mailto:{{ content.home.email }}" class="contact-btn">
+                    {{ content.home.cta_text }} <i class="fas fa-arrow-right"></i>
+                </a>
+            </div>
+            <div class="hero-visual">
+                <div class="profile-frame">
+                    <img src="{{ content.home.profile_image }}" alt="{{ content.home.name_line_1 }} {{ content.home.name_line_2 }}" class="profile-pic">
+                </div>
+                {% if content.home.badge_1 %}
+                <span class="sticker sticker-pink rotate-right float-badge">{{ content.home.badge_1 }}</span>
+                {% endif %}
+                {% if content.home.badge_2 %}
+                <span class="sticker sticker-cyan rotate-left float-badge-2">{{ content.home.badge_2 }}</span>
+                {% endif %}
+            </div>
+        </div>
+        {% if content.home.marquee %}
+        <div class="marquee marquee-hero" aria-hidden="true">
+            <div class="marquee-track">
+                <span>{{ content.home.marquee }}&nbsp;</span>
+                <span>{{ content.home.marquee }}&nbsp;</span>
+            </div>
+        </div>
+        {% endif %}
+    </section>
+
+    {% for section in sections %}
+    <section id="{{ section.id }}" class="section {{ section.theme }}">
+        <div class="container">
+            <div class="section-head">
+                {% if section.label %}<span class="mono-label">{{ section.label }}</span>{% endif %}
+                <h2>{{ section.title }}</h2>
+            </div>
+
+            {% if section.type == "skills" %}
+            <div class="skill-board">
+                {% for skill in section.entries %}
+                <span class="skill-chip c{{ (loop.index0 % 4) + 1 }}">{{ skill }}</span>
+                {% endfor %}
+            </div>
+
+            {% elif section.type == "experience" %}
+            {% for job in section.entries %}
+            <div class="experience-item">
+                <div class="exp-meta">
+                    <span class="date">{{ job.date }}</span>
+                    {% if job.tag %}<span class="exp-tag">{{ job.tag }}</span>{% endif %}
+                </div>
+                <h3>{{ job.title }}</h3>
+                {% if job.bullets %}
+                <ul>
+                    {% for bullet in job.bullets %}
+                    <li>{{ bullet }}</li>
+                    {% endfor %}
+                </ul>
+                {% endif %}
+            </div>
+            {% endfor %}
+
+            {% elif section.type == "education" %}
+            <div class="edu-grid">
+                {% for edu in section.entries %}
+                <article class="edu-block{% if edu.alt %} alt{% endif %}">
+                    <span class="edu-year">{{ edu.year }}</span>
+                    <h3>{{ edu.title }}</h3>
+                    <p>{{ edu.subtitle }}</p>
+                </article>
+                {% endfor %}
+            </div>
+
+            {% elif section.type == "achievements" %}
+            {% for item in section.entries %}
+            <div class="achieve-block" {% if not loop.first %}style="margin-top: 20px;"{% endif %}>
+                {% if item.badge %}<span class="sticker sticker-lime">{{ item.badge }}</span>{% endif %}
+                <p>{{ item.text }}</p>
+            </div>
+            {% endfor %}
+
+            {% else %}
+            <div class="custom-body">
+                {{ section.body | safe }}
+            </div>
+            {% endif %}
+        </div>
+    </section>
+    {% endfor %}
+
+    <footer>
+        <p>{{ content.site.footer }}</p>
+    </footer>
+
+    <script src="/static/js/script.js"></script>
+</body>
+</html>

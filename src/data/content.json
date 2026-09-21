@@ -1,0 +1,198 @@
+{
+  "site": {
+    "title": "Sumit Mandal - AI Engineer",
+    "footer": "© 2026 Sumit Mandal | Designed with creativity."
+  },
+  "home": {
+    "name_line_1": "Sumit",
+    "name_line_2": "Mandal",
+    "role_sticker": "AI Engineer | GenAI, Backend & Cloud",
+    "tagline": "Artificial Intelligence Engineer",
+    "email": "mandal.sumit00@gmail.com",
+    "cta_text": "Contact Me",
+    "profile_image": "/static/images/profile.jpg",
+    "badge_1": "Gen-AI",
+    "badge_2": "MCP · Agents · Voice",
+    "marquee": "Deep Learning ✦ LLM Agents ✦ MCP ✦ LangGraph ✦ Voice AI ✦ Computer Vision ✦ Fine Tuning ✦ PyTorch ✦"
+  },
+  "sections": [
+    {
+      "id": "skills",
+      "type": "skills",
+      "enabled": true,
+      "nav_label": "Skills",
+      "label": "01 // STACK",
+      "title": "Skills",
+      "theme": "skills-section",
+      "entries": [
+        "Deep Learning",
+        "Machine Learning",
+        "Data Science",
+        "Django",
+        "Flask",
+        "REST API",
+        "Python",
+        "Java",
+        "Postgres",
+        "MySQL",
+        "DynamoDB",
+        "Computer Vision",
+        "NLP",
+        "Visualisations",
+        "Image Processing",
+        "Recommendation Systems",
+        "IoT",
+        "Raspberry Pi",
+        "AWS",
+        "GAN",
+        "Knowledge Graph",
+        "LangGraph",
+        "Scikit Learn",
+        "LLM Agents",
+        "Fine Tuning",
+        "MQTT",
+        "SageMaker",
+        "Serverless",
+        "WebRTC",
+        "Artificial Intelligence",
+        "Gen-AI",
+        "PyTorch",
+        "TensorFlow",
+        "Database",
+        "Voice AI",
+        "Large Language Models",
+        "MCP (Model Context Protocol)",
+        "Speech to Text",
+        "Text to Speech"
+      ]
+    },
+    {
+      "id": "experience",
+      "type": "experience",
+      "enabled": true,
+      "nav_label": "Experience",
+      "label": "02 // WORK",
+      "title": "Experience",
+      "theme": "experience-section",
+      "entries": [
+        {
+          "date": "08/2025 – Current",
+          "tag": "Now",
+          "title": "System Architect and Lead (AI) - Eduvanz, Gurugram",
+          "bullets": [
+            "Developed a Model Context Platform (MCP) for efficient hotel data search, improving query accuracy and response time for end users.",
+            "Created End to end CNN based face recognizer and BMI reader to identify fraudsters during video test.",
+            "Engineered a Multi-Agent Chatbot using LLMs and prompt chaining, allowing users to search, plan, and book hotels based on preferences such as location, budget, and comfort.",
+            "Created voice conversational agent to answer any query that user has corresponding to the insurance/banking plan that they opt for.",
+            "Reduced STT and TTS latency to less than 400 ms to support near real-time conversation.",
+            "Architected and created an end to end video creation platform using AI, thus creating videos without any intervention, but just a script or a topic. Scaled it to the creation of 1200 videos a day.",
+            "OpenSourced and scaled Embeddings creation and retrieval, which technically reduced cost from 330 $ to Zero.",
+            "Opensourced Text to speech pipeline, and scaled it to handle 120 requests per minute, hence moving out from paid service providers with less flexibility to free service and more flexibility.",
+            "Created an Evaluation pipeline to suggest which model to use in what use case."
+          ]
+        },
+        {
+          "date": "01/2023 – 07/2025",
+          "tag": "",
+          "title": "System Architect (AI) - TATA AIG, Mumbai",
+          "bullets": [
+            "Spearheaded and operationalized generative AI RAG bot via Open Source, generating daily savings of 0.39 Lakhs INR, totaling nearly 1.4 CR annually.",
+            "Engineered and deployed speech-to-text, translation, transcription, and summarization applications for customer support and sales teams, enhancing customer retention.",
+            "Developed RFQ and Pic to quote application using MultiModal Generative AI application, aiding in product upselling.",
+            "Led a team of 4 in creating a cost-effective ADAS solution, resulting in over 1 million Rupees savings for the company while ensuring life-saving capabilities.",
+            "Automated the conventional \"Video – MER\" authentication system, integrating Value Added Services like BMI Calculation and Disability Detection. Yielded a direct cost reduction of 24 CR.",
+            "Pioneered in live video and audio processing, leveraging untapped potentials in this domain.",
+            "Conceptualized and implemented CNN-based health insurance products, anticipating needs and preventing over 10,000 potential fatalities. Solely orchestrated end-to-end pipeline development.",
+            "Invited by Tata Motors to consult and enhance their ADAS solution."
+          ]
+        },
+        {
+          "date": "06/2022 – 01/2023",
+          "tag": "",
+          "title": "Software Developer (AI) - Proxgy, Gurugram",
+          "bullets": [
+            "Developed a fall detection system utilizing RNN, CNN, and Random Forest, deployed on Raspberry Pi integrated into smart helmets used by Adani and TATA, saving over 30 lives in hazardous conditions.",
+            "Engineered a highly optimized smart PPE Detection algorithm capable of handling 30+ simultaneous requests on a single server, leading to a significant 60% reduction in server usage.",
+            "Designed and implemented a Speech Detection model specialized in recognizing specific words, activating upon detection.",
+            "Integrated Face Detection technology with PPE Detection, minimizing the risk of injury and fatalities by identifying personnel and enforcing safety protocols.",
+            "Constructed a vehicle tracking model deployed on NVIDIA Jetson Nano, optimizing the model to INT8 precision for efficient performance.",
+            "Crafted a multi-stage Vehicle Type → Number Plate → Number Detection model, aiding the government in generating substantial revenue through penalties for traffic rule violators."
+          ]
+        },
+        {
+          "date": "09/2021 – 06/2022",
+          "tag": "",
+          "title": "Machine Learning Engineer (Intern) - TestAIng.com, Noida",
+          "bullets": [
+            "Developed Ethical AI models incorporating explanation mechanisms for prediction reasoning. Applied in Object Detection and NLP models.",
+            "Spearheaded various NLP Test Augmentation methodologies encompassing PII, Text Augmentations, and Counterfactuals among others.",
+            "Established an End-to-End Recommendation System Pipeline integrating content-based and collaborative filtering approaches."
+          ]
+        },
+        {
+          "date": "02/2021 – 09/2021",
+          "tag": "",
+          "title": "Machine Learning Intern - Praedico Technologies, Gwalior",
+          "bullets": [
+            "Engineered an automated stock trading agent employing reinforcement learning for buying and selling actions.",
+            "Utilized RNN and LSTMs to construct several predictive models for forecasting future stock prices."
+          ]
+        },
+        {
+          "date": "02/2021 – 06/2021",
+          "tag": "",
+          "title": "Freelancer - Freelance, Bhilai",
+          "bullets": [
+            "Worked on multiple Object Detection and Image Processing algorithms with more than a couple of clients."
+          ]
+        },
+        {
+          "date": "03/2020 – 08/2020",
+          "tag": "",
+          "title": "Java Backend Trainee - Steel Authority Of India Limited, Bhilai",
+          "bullets": [
+            "Created a small Blogging website using JSP and Servlets, where senior authorities can share their orders, suggestions, and ideas with their juniors. Handed over the project to lead."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "education",
+      "type": "education",
+      "enabled": true,
+      "nav_label": "Education",
+      "label": "03 // SCHOOL",
+      "title": "Education",
+      "theme": "education-section",
+      "entries": [
+        {
+          "year": "2018–2022",
+          "title": "Bachelor of Technology",
+          "subtitle": "ITM University Gwalior",
+          "alt": false
+        },
+        {
+          "year": "2016–2018",
+          "title": "Senior Secondary",
+          "subtitle": "MGM Sr. Sec. School",
+          "alt": true
+        }
+      ]
+    },
+    {
+      "id": "achievements",
+      "type": "achievements",
+      "enabled": true,
+      "nav_label": "Achievements",
+      "label": "04 // WINS",
+      "title": "Achievements",
+      "theme": "achievements-section",
+      "entries": [
+        {
+          "badge": "2023",
+          "text": "Rising Champion, TATA AIG, 2023 - Received the Rising Champions Award..."
+        }
+      ]
+    }
+  ]
+}
