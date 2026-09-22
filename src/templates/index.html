@@ -34,9 +34,28 @@
                 {% endif %}
                 <h1>{{ content.home.name_line_1 }}<br>{{ content.home.name_line_2 }}</h1>
                 <p class="hero-tagline">{{ content.home.tagline }}</p>
-                <a href="mailto:{{ content.home.email }}" class="contact-btn">
-                    {{ content.home.cta_text }} <i class="fas fa-arrow-right"></i>
-                </a>
+                <div class="hero-actions">
+                    <a href="mailto:{{ content.home.email }}" class="contact-btn">
+                        {{ content.home.cta_text }} <i class="fas fa-arrow-right"></i>
+                    </a>
+                    <div class="social-row">
+                        {% if content.home.linkedin %}
+                        <a class="social-btn linkedin" href="{{ content.home.linkedin }}" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn">
+                            <i class="fab fa-linkedin-in"></i>
+                        </a>
+                        {% endif %}
+                        {% if content.home.github %}
+                        <a class="social-btn github" href="{{ content.home.github }}" target="_blank" rel="noopener noreferrer" aria-label="GitHub">
+                            <i class="fab fa-github"></i>
+                        </a>
+                        {% endif %}
+                        {% if content.home.whatsapp %}
+                        <a class="social-btn whatsapp" href="https://wa.me/{{ content.home.whatsapp | replace('+', '') | replace(' ', '') | replace('-', '') }}" target="_blank" rel="noopener noreferrer" aria-label="WhatsApp">
+                            <i class="fab fa-whatsapp"></i>
+                        </a>
+                        {% endif %}
+                    </div>
+                </div>
             </div>
             <div class="hero-visual">
                 <div class="profile-frame">

@@ -256,6 +256,40 @@ body {
     box-shadow: 2px 2px 0 var(--ink);
 }
 
+.hero-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 14px;
+}
+
+.social-row {
+    display: flex;
+    gap: 10px;
+}
+
+.social-btn {
+    display: grid;
+    place-items: center;
+    width: 48px;
+    height: 48px;
+    border: var(--border);
+    box-shadow: var(--shadow-sm);
+    color: var(--ink);
+    text-decoration: none;
+    font-size: 1.2rem;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.social-btn.linkedin { background: var(--cyan); }
+.social-btn.github { background: var(--butter); }
+.social-btn.whatsapp { background: var(--lime); }
+
+.social-btn:hover {
+    transform: translate(-2px, -2px);
+    box-shadow: 6px 6px 0 var(--ink);
+}
+
 .hero-visual {
     position: relative;
     display: flex;
@@ -632,6 +666,10 @@ footer p {
     .hero-tagline {
         margin-left: auto;
         margin-right: auto;
+    }
+
+    .hero-actions {
+        justify-content: center;
     }
 
     .float-badge {

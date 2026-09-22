@@ -55,6 +55,11 @@
                         <label>Email<input name="email" type="email" value="{{ content.home.email }}"></label>
                         <label>CTA text<input name="cta_text" value="{{ content.home.cta_text }}"></label>
                     </div>
+                    <label>LinkedIn URL<input name="linkedin" value="{{ content.home.linkedin or '' }}" placeholder="https://www.linkedin.com/in/..."></label>
+                    <div class="grid-2">
+                        <label>GitHub URL<input name="github" value="{{ content.home.github or '' }}" placeholder="https://github.com/..."></label>
+                        <label>WhatsApp<input name="whatsapp" value="{{ content.home.whatsapp or '' }}" placeholder="+91 9876543210"></label>
+                    </div>
                     <div class="grid-2">
                         <label>Badge 1<input name="badge_1" value="{{ content.home.badge_1 }}"></label>
                         <label>Badge 2<input name="badge_2" value="{{ content.home.badge_2 }}"></label>
