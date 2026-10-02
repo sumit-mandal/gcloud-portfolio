@@ -1,35 +1,50 @@
+"""Travel diary FastAPI app with SQLite-backed admin CMS."""
+
+from __future__ import annotations
+
+import hashlib
 import os
+import secrets
 import sqlite3
 import uuid
-import hashlib
-import secrets
-from functools import wraps
-from flask import (
-    Flask, render_template, request, jsonify,
-    session, redirect, url_for
-)
+from pathlib import Path
+from typing import Annotated
+
 from dotenv import load_dotenv
+from fastapi import (
+    Depends,
+    FastAPI,
+    File,
+    Form,
+    HTTPException,
+    Request,
+    UploadFile,
+)
+from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse
+from fastapi.staticfiles import StaticFiles
+from fastapi.templating import Jinja2Templates
+from starlette.middleware.sessions import SessionMiddleware
 
-load_dotenv(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '.env'))
+BASE_DIR = Path(__file__).resolve().parent
+ROOT_DIR = BASE_DIR.parent
+load_dotenv(ROOT_DIR / ".env")
 
-app = Flask(__name__)
-app.secret_key = os.environ.get('SECRET_KEY', secrets.token_hex(32))
+UPLOAD_FOLDER = BASE_DIR / "static" / "uploads"
+DB_PATH = BASE_DIR / "portfolio.db"
+ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg", "gif", "webp"}
 
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-UPLOAD_FOLDER = os.path.join(BASE_DIR, 'static', 'uploads')
-DB_PATH = os.path.join(BASE_DIR, 'portfolio.db')
-ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'webp'}
+UPLOAD_FOLDER.mkdir(parents=True, exist_ok=True)
 
-app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
-app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024
-
-os.makedirs(UPLOAD_FOLDER, exist_ok=True)
-
-# Default admin credentials — change via env vars in production
-ADMIN_USER = os.environ.get('ADMIN_USER', 'admin')
+SECRET_KEY = os.environ.get("SECRET_KEY", secrets.token_hex(32))
+ADMIN_USER = os.environ.get("ADMIN_USER", "admin")
 ADMIN_PASS_HASH = hashlib.sha256(
-    os.environ.get('ADMIN_PASS', 'admin123').encode()
+    os.environ.get("ADMIN_PASS", "admin123").encode()
 ).hexdigest()
+
+app = FastAPI(title="Rerouted")
+app.add_middleware(SessionMiddleware, secret_key=SECRET_KEY, max_age=60 * 60 * 12)
+app.mount("/static", StaticFiles(directory=BASE_DIR / "static"), name="static")
+templates = Jinja2Templates(directory=str(BASE_DIR / "templates"))
 
 
 def get_db():
@@ -37,30 +52,6 @@ def get_db():
     conn.row_factory = sqlite3.Row
     conn.execute("PRAGMA foreign_keys = ON")
     return conn
-
-
-def init_db():
-    conn = get_db()
-    conn.executescript('''
-        CREATE TABLE IF NOT EXISTS sections (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            title TEXT NOT NULL,
-            description TEXT NOT NULL,
-            display_order INTEGER NOT NULL DEFAULT 0,
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-        );
-        CREATE TABLE IF NOT EXISTS images (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            section_id INTEGER NOT NULL,
-            filename TEXT NOT NULL,
-            FOREIGN KEY (section_id) REFERENCES sections(id) ON DELETE CASCADE
-        );
-    ''')
-    conn.commit()
-    count = conn.execute('SELECT COUNT(*) FROM sections').fetchone()[0]
-    if count == 0:
-        seed_data(conn)
-    conn.close()
 
 
 def seed_data(conn):
@@ -78,201 +69,308 @@ def seed_data(conn):
     ]
     for i, (title, desc, photos) in enumerate(entries):
         cursor = conn.execute(
-            'INSERT INTO sections (title, description, display_order) VALUES (?, ?, ?)',
-            (title, desc, i)
+            "INSERT INTO sections (title, description, display_order) VALUES (?, ?, ?)",
+            (title, desc, i),
         )
         section_id = cursor.lastrowid
         for photo in photos:
             conn.execute(
-                'INSERT INTO images (section_id, filename) VALUES (?, ?)',
-                (section_id, photo)
+                "INSERT INTO images (section_id, filename) VALUES (?, ?)",
+                (section_id, photo),
             )
     conn.commit()
 
 
-def allowed_file(filename):
-    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+def init_db():
+    conn = get_db()
+    conn.executescript(
+        """
+        CREATE TABLE IF NOT EXISTS sections (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            title TEXT NOT NULL,
+            description TEXT NOT NULL,
+            display_order INTEGER NOT NULL DEFAULT 0,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        );
+        CREATE TABLE IF NOT EXISTS images (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            section_id INTEGER NOT NULL,
+            filename TEXT NOT NULL,
+            FOREIGN KEY (section_id) REFERENCES sections(id) ON DELETE CASCADE
+        );
+        """
+    )
+    conn.commit()
+    count = conn.execute("SELECT COUNT(*) FROM sections").fetchone()[0]
+    if count == 0:
+        seed_data(conn)
+    conn.close()
 
 
-def get_image_url(filename):
-    if os.path.exists(os.path.join(UPLOAD_FOLDER, filename)):
-        return f'/static/uploads/{filename}'
-    return f'/static/images/{filename}'
+def allowed_file(filename: str) -> bool:
+    return "." in filename and filename.rsplit(".", 1)[1].lower() in ALLOWED_EXTENSIONS
+
+
+def get_image_url(filename: str) -> str:
+    if (UPLOAD_FOLDER / filename).exists():
+        return f"/static/uploads/{filename}"
+    return f"/static/images/{filename}"
 
 
 def load_sections():
     conn = get_db()
-    sections = conn.execute('SELECT * FROM sections ORDER BY display_order, id').fetchall()
+    sections = conn.execute(
+        "SELECT * FROM sections ORDER BY display_order DESC, id DESC"
+    ).fetchall()
     result = []
     for section in sections:
-        images = conn.execute('SELECT * FROM images WHERE section_id = ?', (section['id'],)).fetchall()
-        result.append({
-            'id': section['id'],
-            'title': section['title'],
-            'description': section['description'],
-            'images': [{'id': img['id'], 'url': get_image_url(img['filename']), 'filename': img['filename']} for img in images]
-        })
+        images = conn.execute(
+            "SELECT * FROM images WHERE section_id = ?", (section["id"],)
+        ).fetchall()
+        result.append(
+            {
+                "id": section["id"],
+                "title": section["title"],
+                "description": section["description"],
+                "images": [
+                    {
+                        "id": img["id"],
+                        "url": get_image_url(img["filename"]),
+                        "filename": img["filename"],
+                    }
+                    for img in images
+                ],
+            }
+        )
     conn.close()
     return result
 
 
-def admin_required(f):
-    @wraps(f)
-    def decorated(*args, **kwargs):
-        if not session.get('admin'):
-            if request.is_json or request.content_type and 'multipart' in request.content_type:
-                return jsonify({'error': 'Unauthorized'}), 401
-            return redirect(url_for('admin_login'))
-        return f(*args, **kwargs)
-    return decorated
+def is_admin(request: Request) -> bool:
+    return bool(request.session.get("admin"))
 
 
-# ── Public Routes ──
+def require_admin_api(request: Request) -> bool:
+    if not is_admin(request):
+        raise HTTPException(status_code=401, detail="Unauthorized")
+    return True
 
-@app.route('/')
-def index():
-    return render_template('index.html', sections=load_sections())
+
+async def save_uploads(files: list[UploadFile], conn, section_id: int) -> list[dict]:
+    uploaded = []
+    for file in files:
+        if not file or not file.filename or not allowed_file(file.filename):
+            continue
+        ext = file.filename.rsplit(".", 1)[1].lower()
+        filename = f"{uuid.uuid4().hex}.{ext}"
+        dest = UPLOAD_FOLDER / filename
+        content = await file.read()
+        dest.write_bytes(content)
+        conn.execute(
+            "INSERT INTO images (section_id, filename) VALUES (?, ?)",
+            (section_id, filename),
+        )
+        img_id = conn.execute("SELECT last_insert_rowid()").fetchone()[0]
+        uploaded.append(
+            {"id": img_id, "url": f"/static/uploads/{filename}", "filename": filename}
+        )
+    return uploaded
 
 
-# ── Admin Auth ──
+# ── Public ──
 
-@app.route('/admin/login', methods=['GET', 'POST'])
-def admin_login():
-    if session.get('admin'):
-        return redirect(url_for('admin_panel'))
+
+@app.get("/", response_class=HTMLResponse)
+def index(request: Request):
+    return templates.TemplateResponse(
+        request,
+        "index.html",
+        {"sections": load_sections()},
+    )
+
+
+# ── Admin auth ──
+
+
+@app.api_route("/admin/login", methods=["GET", "POST"], response_class=HTMLResponse)
+async def admin_login(request: Request):
+    if is_admin(request):
+        return RedirectResponse(url="/admin", status_code=303)
+
     error = None
-    if request.method == 'POST':
-        username = request.form.get('username', '')
-        password = request.form.get('password', '')
+    if request.method == "POST":
+        form = await request.form()
+        username = str(form.get("username", ""))
+        password = str(form.get("password", ""))
         pass_hash = hashlib.sha256(password.encode()).hexdigest()
         if username == ADMIN_USER and pass_hash == ADMIN_PASS_HASH:
-            session['admin'] = True
-            return redirect(url_for('admin_panel'))
-        error = 'Invalid credentials'
-    return render_template('admin_login.html', error=error)
+            request.session["admin"] = True
+            return RedirectResponse(url="/admin", status_code=303)
+        error = "Invalid credentials"
+
+    return templates.TemplateResponse(
+        request,
+        "admin_login.html",
+        {"error": error},
+    )
 
 
-@app.route('/admin/logout')
-def admin_logout():
-    session.pop('admin', None)
-    return redirect(url_for('index'))
+@app.get("/admin/logout")
+def admin_logout(request: Request):
+    request.session.pop("admin", None)
+    return RedirectResponse(url="/", status_code=303)
 
 
-# ── Admin Panel ──
+@app.get("/admin", response_class=HTMLResponse)
+def admin_panel(request: Request):
+    if not is_admin(request):
+        return RedirectResponse(url="/admin/login", status_code=303)
+    return templates.TemplateResponse(
+        request,
+        "admin.html",
+        {"sections": load_sections()},
+    )
 
-@app.route('/admin')
-@admin_required
-def admin_panel():
-    return render_template('admin.html', sections=load_sections())
+
+# ── API ──
 
 
-# ── API (admin-protected) ──
-
-@app.route('/api/sections', methods=['POST'])
-@admin_required
-def create_section():
-    title = request.form.get('title', '').strip()
-    description = request.form.get('description', '').strip()
+@app.post("/api/sections")
+async def create_section(
+    request: Request,
+    _: Annotated[bool, Depends(require_admin_api)],
+    title: Annotated[str, Form()] = "",
+    description: Annotated[str, Form()] = "",
+    images: Annotated[list[UploadFile] | None, File()] = None,
+):
+    title = title.strip()
+    description = description.strip()
     if not title or not description:
-        return jsonify({'error': 'Title and description are required'}), 400
+        return JSONResponse(
+            {"error": "Title and description are required"}, status_code=400
+        )
 
     conn = get_db()
-    max_order = conn.execute('SELECT COALESCE(MAX(display_order), -1) FROM sections').fetchone()[0]
+    max_order = conn.execute(
+        "SELECT COALESCE(MAX(display_order), -1) FROM sections"
+    ).fetchone()[0]
     cursor = conn.execute(
-        'INSERT INTO sections (title, description, display_order) VALUES (?, ?, ?)',
-        (title, description, max_order + 1)
+        "INSERT INTO sections (title, description, display_order) VALUES (?, ?, ?)",
+        (title, description, max_order + 1),
     )
     section_id = cursor.lastrowid
-
-    uploaded_images = []
-    for file in request.files.getlist('images'):
-        if file and file.filename and allowed_file(file.filename):
-            ext = file.filename.rsplit('.', 1)[1].lower()
-            filename = f"{uuid.uuid4().hex}.{ext}"
-            file.save(os.path.join(UPLOAD_FOLDER, filename))
-            conn.execute('INSERT INTO images (section_id, filename) VALUES (?, ?)', (section_id, filename))
-            img_id = conn.execute('SELECT last_insert_rowid()').fetchone()[0]
-            uploaded_images.append({'id': img_id, 'url': f'/static/uploads/{filename}', 'filename': filename})
-
+    uploaded_images = await save_uploads(images or [], conn, section_id)
     conn.commit()
     conn.close()
-    return jsonify({'id': section_id, 'title': title, 'description': description, 'images': uploaded_images}), 201
+    return JSONResponse(
+        {
+            "id": section_id,
+            "title": title,
+            "description": description,
+            "images": uploaded_images,
+        },
+        status_code=201,
+    )
 
 
-@app.route('/api/sections/<int:section_id>', methods=['PUT'])
-@admin_required
-def update_section(section_id):
-    title = request.form.get('title', '').strip()
-    description = request.form.get('description', '').strip()
+@app.put("/api/sections/{section_id}")
+async def update_section(
+    section_id: int,
+    request: Request,
+    _: Annotated[bool, Depends(require_admin_api)],
+    title: Annotated[str, Form()] = "",
+    description: Annotated[str, Form()] = "",
+    images: Annotated[list[UploadFile] | None, File()] = None,
+):
+    title = title.strip()
+    description = description.strip()
     if not title or not description:
-        return jsonify({'error': 'Title and description are required'}), 400
+        return JSONResponse(
+            {"error": "Title and description are required"}, status_code=400
+        )
 
     conn = get_db()
-    section = conn.execute('SELECT * FROM sections WHERE id = ?', (section_id,)).fetchone()
+    section = conn.execute(
+        "SELECT * FROM sections WHERE id = ?", (section_id,)
+    ).fetchone()
     if not section:
         conn.close()
-        return jsonify({'error': 'Section not found'}), 404
+        return JSONResponse({"error": "Section not found"}, status_code=404)
 
-    conn.execute('UPDATE sections SET title = ?, description = ? WHERE id = ?', (title, description, section_id))
-
-    for file in request.files.getlist('images'):
-        if file and file.filename and allowed_file(file.filename):
-            ext = file.filename.rsplit('.', 1)[1].lower()
-            filename = f"{uuid.uuid4().hex}.{ext}"
-            file.save(os.path.join(UPLOAD_FOLDER, filename))
-            conn.execute('INSERT INTO images (section_id, filename) VALUES (?, ?)', (section_id, filename))
-
+    conn.execute(
+        "UPDATE sections SET title = ?, description = ? WHERE id = ?",
+        (title, description, section_id),
+    )
+    await save_uploads(images or [], conn, section_id)
     conn.commit()
-    all_images = conn.execute('SELECT * FROM images WHERE section_id = ?', (section_id,)).fetchall()
+    all_images = conn.execute(
+        "SELECT * FROM images WHERE section_id = ?", (section_id,)
+    ).fetchall()
     conn.close()
 
-    return jsonify({
-        'id': section_id, 'title': title, 'description': description,
-        'images': [{'id': img['id'], 'url': get_image_url(img['filename']), 'filename': img['filename']} for img in all_images]
-    })
+    return {
+        "id": section_id,
+        "title": title,
+        "description": description,
+        "images": [
+            {
+                "id": img["id"],
+                "url": get_image_url(img["filename"]),
+                "filename": img["filename"],
+            }
+            for img in all_images
+        ],
+    }
 
 
-@app.route('/api/sections/<int:section_id>', methods=['DELETE'])
-@admin_required
-def delete_section(section_id):
+@app.delete("/api/sections/{section_id}")
+def delete_section(
+    section_id: int,
+    request: Request,
+    _: Annotated[bool, Depends(require_admin_api)],
+):
     conn = get_db()
-    section = conn.execute('SELECT * FROM sections WHERE id = ?', (section_id,)).fetchone()
+    section = conn.execute(
+        "SELECT * FROM sections WHERE id = ?", (section_id,)
+    ).fetchone()
     if not section:
         conn.close()
-        return jsonify({'error': 'Section not found'}), 404
+        return JSONResponse({"error": "Section not found"}, status_code=404)
 
-    images = conn.execute('SELECT * FROM images WHERE section_id = ?', (section_id,)).fetchall()
+    images = conn.execute(
+        "SELECT * FROM images WHERE section_id = ?", (section_id,)
+    ).fetchall()
     for img in images:
-        filepath = os.path.join(UPLOAD_FOLDER, img['filename'])
-        if os.path.exists(filepath):
-            os.remove(filepath)
+        filepath = UPLOAD_FOLDER / img["filename"]
+        if filepath.exists():
+            filepath.unlink()
 
-    conn.execute('DELETE FROM sections WHERE id = ?', (section_id,))
+    conn.execute("DELETE FROM sections WHERE id = ?", (section_id,))
     conn.commit()
     conn.close()
-    return jsonify({'message': 'Section deleted'}), 200
+    return {"message": "Section deleted"}
 
 
-@app.route('/api/images/<int:image_id>', methods=['DELETE'])
-@admin_required
-def delete_image(image_id):
+@app.delete("/api/images/{image_id}")
+def delete_image(
+    image_id: int,
+    request: Request,
+    _: Annotated[bool, Depends(require_admin_api)],
+):
     conn = get_db()
-    image = conn.execute('SELECT * FROM images WHERE id = ?', (image_id,)).fetchone()
+    image = conn.execute("SELECT * FROM images WHERE id = ?", (image_id,)).fetchone()
     if not image:
         conn.close()
-        return jsonify({'error': 'Image not found'}), 404
+        return JSONResponse({"error": "Image not found"}, status_code=404)
 
-    filepath = os.path.join(UPLOAD_FOLDER, image['filename'])
-    if os.path.exists(filepath):
-        os.remove(filepath)
+    filepath = UPLOAD_FOLDER / image["filename"]
+    if filepath.exists():
+        filepath.unlink()
 
-    conn.execute('DELETE FROM images WHERE id = ?', (image_id,))
+    conn.execute("DELETE FROM images WHERE id = ?", (image_id,))
     conn.commit()
     conn.close()
-    return jsonify({'message': 'Image deleted'}), 200
+    return {"message": "Image deleted"}
 
 
 init_db()
-
-if __name__ == "__main__":
-    app.run(debug=True)
